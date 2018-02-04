@@ -1,9 +1,110 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.AnchorPane?>
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="jallah.tarnue.budget.controller.MainController"
-            prefHeight="400.0" prefWidth="600.0">
-
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<AnchorPane prefHeight="583.0" prefWidth="704.0" xmlns="http://javafx.com/javafx/9.0.1"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="jallah.tarnue.budget.controller.MainController">
+    <children>
+        <SplitPane dividerPositions="0.5" prefHeight="453.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0"
+                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <items>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                    <children>
+                        <VBox alignment="TOP_CENTER" prefHeight="451.0" prefWidth="201.0" spacing="15.0"
+                              AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                              AnchorPane.topAnchor="0.0">
+                            <children>
+                                <DatePicker fx:id="payPeriod" prefHeight="34.0" prefWidth="174.0"
+                                            promptText="Pay Period">
+                                    <VBox.margin>
+                                        <Insets top="15.0"/>
+                                    </VBox.margin>
+                                </DatePicker>
+                                <TextField fx:id="payAmountTxt" alignment="CENTER" prefHeight="12.0" prefWidth="592.0"
+                                           promptText="Amount">
+                                    <VBox.margin>
+                                        <Insets left="50.0" right="50.0"/>
+                                    </VBox.margin>
+                                    <font>
+                                        <Font name="Avenir LT 55 Roman" size="16.0"/>
+                                    </font>
+                                </TextField>
+                                <Button fx:id="usageBtn" mnemonicParsing="false" prefHeight="44.0" prefWidth="144.0"
+                                        text="Add usage" textAlignment="CENTER">
+                                    <VBox.margin>
+                                        <Insets/>
+                                    </VBox.margin>
+                                    <font>
+                                        <Font size="17.0"/>
+                                    </font>
+                                </Button>
+                                <TableView fx:id="usageTable" prefHeight="95.0" prefWidth="93.0">
+                                    <columns>
+                                        <TableColumn fx:id="usageCol" prefWidth="75.0" text="Usage"/>
+                                        <TableColumn fx:id="amountCol" prefWidth="75.0" text="Amount"/>
+                                        <TableColumn fx:id="dateCol" prefWidth="75.0" text="Date"/>
+                                        <TableColumn fx:id="completedCol" prefWidth="75.0" text="Completed"/>
+                                    </columns>
+                                    <VBox.margin>
+                                        <Insets left="20.0" right="20.0"/>
+                                    </VBox.margin>
+                                    <columnResizePolicy>
+                                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                                    </columnResizePolicy>
+                                </TableView>
+                                <TextField fx:id="totalUsageTxt" alignment="CENTER" promptText="Total Usage">
+                                    <VBox.margin>
+                                        <Insets left="60.0" right="60.0"/>
+                                    </VBox.margin>
+                                </TextField>
+                                <TextField fx:id="amountLeftTxt" alignment="CENTER" layoutX="10.0" layoutY="295.0"
+                                           promptText="Amount Left">
+                                    <VBox.margin>
+                                        <Insets left="60.0" right="60.0"/>
+                                    </VBox.margin>
+                                </TextField>
+                                <TextField fx:id="spendMoneyTxt" alignment="CENTER" layoutX="10.0" layoutY="295.0"
+                                           promptText="Spending money">
+                                    <VBox.margin>
+                                        <Insets left="60.0" right="60.0"/>
+                                    </VBox.margin>
+                                </TextField>
+                                <TextField fx:id="primarySavingTxt" alignment="CENTER" layoutX="10.0" layoutY="335.0"
+                                           promptText="Primary saving">
+                                    <VBox.margin>
+                                        <Insets left="60.0" right="60.0"/>
+                                    </VBox.margin>
+                                </TextField>
+                                <TextField fx:id="secondarySavingTxt" alignment="CENTER" layoutX="10.0" layoutY="415.0"
+                                           promptText="Secondary saving">
+                                    <VBox.margin>
+                                        <Insets left="60.0" right="60.0"/>
+                                    </VBox.margin>
+                                </TextField>
+                                <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="15.0">
+                                    <children>
+                                        <Button fx:id="saveBtn" mnemonicParsing="false" prefHeight="48.0"
+                                                prefWidth="121.0" text="Save">
+                                            <font>
+                                                <Font size="22.0"/>
+                                            </font>
+                                        </Button>
+                                        <Button fx:id="cancelBtn" layoutX="124.0" layoutY="36.0" mnemonicParsing="false"
+                                                prefHeight="48.0" prefWidth="121.0" text="Cancel">
+                                            <font>
+                                                <Font size="22.0"/>
+                                            </font>
+                                        </Button>
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </AnchorPane>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0"/>
+            </items>
+        </SplitPane>
+    </children>
 </AnchorPane>

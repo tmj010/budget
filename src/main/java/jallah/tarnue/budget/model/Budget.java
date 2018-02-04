@@ -6,11 +6,14 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
 import javax.persistence.*;
+import java.sql.Date;
 
 @Entity
 @Table(name = "Budget")
+@Access(AccessType.PROPERTY)
 public class Budget {
     private IntegerProperty id = new SimpleIntegerProperty(this, "id");
+    private Date payPeriod;
     private DoubleProperty payAmount = new SimpleDoubleProperty(this, "payAmount");
     private DoubleProperty amountLeft = new SimpleDoubleProperty(this, "amountLeft");
     private DoubleProperty spendingMoney = new SimpleDoubleProperty(this, "spendingMoney");
@@ -73,4 +76,12 @@ public class Budget {
         this.secondarySaving.setValue(secondarySaving);
     }
 
+    @Column(name = "pay_period")
+    public Date getPayPeriod() {
+        return payPeriod;
+    }
+
+    public void setPayPeriod(Date payPeriod) {
+        this.payPeriod = payPeriod;
+    }
 }

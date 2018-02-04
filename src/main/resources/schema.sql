@@ -5,7 +5,8 @@ CREATE TABLE IF NOT EXISTS BUDGET
   amount_left      DOUBLE          NOT NULL,
   spending_money   DOUBLE          NOT NULL,
   primary_saving   DOUBLE          NOT NULL,
-  secondary_saving DOUBLE          NOT NULL
+  secondary_saving DOUBLE          NOT NULL,
+  pay_period       DATE            NOT NULL
 );
 
 
