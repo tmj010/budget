@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<AnchorPane prefHeight="233.0" prefWidth="261.0" xmlns="http://javafx.com/javafx/9.0.1"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="jallah.tarnue.budget.controller.ExpensiveController"
+            fx:id="root">
+    <children>
+        <VBox alignment="TOP_CENTER" layoutX="90.0" layoutY="14.0" prefHeight="267.0" prefWidth="280.0" spacing="15.0"
+              AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+              AnchorPane.topAnchor="0.0">
+            <children>
+                <TextField fx:id="expenseTxt" promptText="Expense">
+                    <VBox.margin>
+                        <Insets left="50.0" right="50.0" top="15.0"/>
+                    </VBox.margin>
+                </TextField>
+                <TextField fx:id="amountTxt" promptText="Amount">
+                    <VBox.margin>
+                        <Insets left="70.0" right="70.0"/>
+                    </VBox.margin>
+                </TextField>
+                <DatePicker fx:id="dueDateDp" promptText="Due Date"/>
+                <CheckBox fx:id="completedCb" mnemonicParsing="false" text="Completed"/>
+                <HBox alignment="CENTER" prefHeight="69.0" prefWidth="280.0" spacing="15.0">
+                    <children>
+                        <Button fx:id="addBtn" mnemonicParsing="false" onAction="#addExpense" prefHeight="45.0"
+                                prefWidth="89.0" text="Add">
+                            <font>
+                                <Font name="System Bold" size="15.0"/>
+                            </font>
+                        </Button>
+                        <Button fx:id="cancelBtn" layoutX="106.0" layoutY="22.0" mnemonicParsing="false"
+                                onAction="#cancelExpense" prefHeight="45.0" prefWidth="89.0" text="Cancel">
+                            <font>
+                                <Font name="System Bold" size="15.0"/>
+                            </font>
+                        </Button>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

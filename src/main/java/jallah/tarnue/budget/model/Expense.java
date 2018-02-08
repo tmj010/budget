@@ -3,15 +3,15 @@ package jallah.tarnue.budget.model;
 import javafx.beans.property.*;
 
 import javax.persistence.*;
-import java.sql.Date;
+import java.util.Date;
 
 @Entity
-@Table(name = "Usage")
-public class Usage {
+@Table(name = "Expense")
+public class Expense {
     private Date date;
     private Budget budget;
     private IntegerProperty id = new SimpleIntegerProperty(this, "id");
-    private StringProperty usage = new SimpleStringProperty(this, "usage");
+    private StringProperty expense = new SimpleStringProperty(this, "expense");
     private DoubleProperty amount = new SimpleDoubleProperty(this, "amount");
     private BooleanProperty completed = new SimpleBooleanProperty(this, "completed");
 
@@ -26,13 +26,13 @@ public class Usage {
         this.id.setValue(id);
     }
 
-    @Column(name = "usage")
-    public String getUsage() {
-        return usage.getValue();
+    @Column(name = "expense")
+    public String getExpense() {
+        return expense.getValue();
     }
 
-    public void setUsage(String usage) {
-        this.usage.setValue(usage);
+    public void setExpense(String expense) {
+        this.expense.setValue(expense);
     }
 
     @Column(name = "amount")
@@ -63,13 +63,25 @@ public class Usage {
         this.completed.setValue(completed);
     }
 
-    @Column(name = "date")
-    public Date getDate() {
-        return date;
-    }
-
     public void setDate(Date date) {
         this.date = date;
     }
 
+    @Column(name = "date")
+    @Temporal(TemporalType.DATE)
+    public Date getDate() {
+        return date;
+    }
+
+    public BooleanProperty completedProperty() {
+        return completed;
+    }
+
+    public StringProperty expenseProperty() {
+        return expense;
+    }
+
+    public DoubleProperty amountProperty() {
+        return amount;
+    }
 }

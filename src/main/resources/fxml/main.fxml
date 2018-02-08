@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<AnchorPane prefHeight="583.0" prefWidth="704.0" xmlns="http://javafx.com/javafx/9.0.1"
+<AnchorPane fx:id="root" prefHeight="583.0" prefWidth="704.0" xmlns="http://javafx.com/javafx/9.0.1"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="jallah.tarnue.budget.controller.MainController">
     <children>
         <SplitPane dividerPositions="0.5" prefHeight="453.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0"
@@ -31,8 +31,8 @@
                                         <Font name="Avenir LT 55 Roman" size="16.0"/>
                                     </font>
                                 </TextField>
-                                <Button fx:id="usageBtn" mnemonicParsing="false" prefHeight="44.0" prefWidth="144.0"
-                                        text="Add usage" textAlignment="CENTER">
+                                <Button fx:id="addExpenseBtn" mnemonicParsing="false" onAction="#addExpense"
+                                        prefHeight="44.0" prefWidth="144.0" text="Add expense" textAlignment="CENTER">
                                     <VBox.margin>
                                         <Insets/>
                                     </VBox.margin>
@@ -40,9 +40,9 @@
                                         <Font size="17.0"/>
                                     </font>
                                 </Button>
-                                <TableView fx:id="usageTable" prefHeight="95.0" prefWidth="93.0">
+                                <TableView fx:id="expenseTable" prefHeight="95.0" prefWidth="93.0">
                                     <columns>
-                                        <TableColumn fx:id="usageCol" prefWidth="75.0" text="Usage"/>
+                                        <TableColumn fx:id="expenseCol" prefWidth="75.0" text="Expense"/>
                                         <TableColumn fx:id="amountCol" prefWidth="75.0" text="Amount"/>
                                         <TableColumn fx:id="dateCol" prefWidth="75.0" text="Date"/>
                                         <TableColumn fx:id="completedCol" prefWidth="75.0" text="Completed"/>
