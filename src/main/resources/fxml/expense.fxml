@@ -26,7 +26,7 @@
                 <CheckBox fx:id="completedCb" mnemonicParsing="false" text="Completed"/>
                 <HBox alignment="CENTER" prefHeight="69.0" prefWidth="280.0" spacing="15.0">
                     <children>
-                        <Button fx:id="addBtn" mnemonicParsing="false" onAction="#addExpense" prefHeight="45.0"
+                        <Button fx:id="addBtn" mnemonicParsing="false" onAction="#addOrUpdateExpense" prefHeight="45.0"
                                 prefWidth="89.0" text="Add">
                             <font>
                                 <Font name="System Bold" size="15.0"/>

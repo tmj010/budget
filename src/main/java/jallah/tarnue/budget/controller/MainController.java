@@ -2,8 +2,9 @@ package jallah.tarnue.budget.controller;
 
 import jallah.tarnue.budget.SpringFXMLLoader;
 import jallah.tarnue.budget.model.Expense;
+import jallah.tarnue.budget.util.BudgetUtil;
 import javafx.beans.binding.Bindings;
-import javafx.collections.ListChangeListener;
+import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
@@ -24,7 +25,6 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Component
@@ -85,14 +85,38 @@ public class MainController {
         expenseCol.setCellValueFactory(new PropertyValueFactory<>("expense"));
         amountCol.setCellValueFactory(new PropertyValueFactory<>("amount"));
         dateCol.setCellValueFactory(new PropertyValueFactory<>("date"));
-        dateCol.setCellFactory(TextFieldTableCell.forTableColumn(new DateColDisplay()));
+        dateCol.setCellFactory(TextFieldTableCell.forTableColumn(new StringConverter<Date>() {
+            @Override
+            public String toString(Date date) {
+                if (null == date) {
+                    return "";
+                }
+                return dateFormatter.format(date);
+            }
+
+            @Override
+            public Date fromString(String dateStr) {
+                if (null != dateStr) {
+                    try {
+                        return dateFormatter.parse(dateStr);
+                    } catch (ParseException e) {
+                        LOGGER.severe("Error in date");
+                    }
+                }
+                return null;
+            }
+        }));
+
         completedCol.setCellValueFactory(new PropertyValueFactory<>("completed"));
         completedCol.setCellFactory(CheckBoxTableCell.forTableColumn(completedCol));
-        expensiveController.getExpenses().addListener((ListChangeListener<Expense>) c -> {
-            if (c.next()) {
-                expenseTable.getItems().addAll(c.getAddedSubList());
+        expensiveController.getExpenses().addListener((SetChangeListener<Expense>) change -> {
+            if (change.wasAdded()) {
+                expenseTable.getItems().add(change.getElementAdded());
+            } else if (change.wasRemoved()) {
+                expenseTable.getItems().remove(change.getElementRemoved());
             }
         });
+
         expenseTable.setRowFactory(tableView -> {
             final TableRow<Expense> row = new TableRow<>();
             final ContextMenu rowMenu = new ContextMenu();
@@ -100,14 +124,21 @@ public class MainController {
             MenuItem editExpense = new MenuItem("Edit");
             editExpense.setOnAction(event -> {
                 try {
-                    expensiveController.editExpense(row.getItem());
                     addExpense(event);
+                    Expense expense = row.getItem();
+                    expensiveController.setExpense(expense);
+                    expensiveController.editExpense(expense);
+                    expensiveController.getAddBtn().setText(BudgetUtil.UPDATE_TEXT);
                 } catch (IOException e) {
+                    LOGGER.severe("Error");
                 }
             });
 
             MenuItem deleteExpense = new MenuItem("Delete");
-            deleteExpense.setOnAction(event -> tableView.getItems().remove(row.getItem()));
+            deleteExpense.setOnAction(event -> {
+                expensiveController.getExpenses().remove(row.getItem());
+                tableView.getItems().remove(row.getItem());
+            });
 
             rowMenu.getItems().addAll(editExpense, deleteExpense);
             row.contextMenuProperty().bind(
@@ -128,27 +159,4 @@ public class MainController {
         expenseStage.setTitle(EXPENSE_TITLE);
         expenseStage.show();
     }
-
-    private class DateColDisplay extends StringConverter<Date> {
-        @Override
-        public String toString(Date date) {
-            if (null == date) {
-                return "";
-            }
-            return dateFormatter.format(date);
-        }
-
-        @Override
-        public Date fromString(String dateStr) {
-            if (null != dateStr) {
-                try {
-                    return dateFormatter.parse(dateStr);
-                } catch (ParseException e) {
-                    LOGGER.log(Level.SEVERE, "Error in date");
-                }
-            }
-            return null;
-        }
-    }
-
 }

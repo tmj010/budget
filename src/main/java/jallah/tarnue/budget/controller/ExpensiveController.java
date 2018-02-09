@@ -1,15 +1,14 @@
 package jallah.tarnue.budget.controller;
 
 import jallah.tarnue.budget.model.Expense;
-import jallah.tarnue.budget.repository.ExpenseRepository;
+import jallah.tarnue.budget.util.BudgetUtil;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.collections.ObservableSet;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -35,30 +34,44 @@ public class ExpensiveController {
     @FXML
     private Button cancelBtn;
 
-    private ObservableList<Expense> expenses = FXCollections.observableArrayList();
-    private ExpenseRepository expenseRepository;
+    private Expense expense;
+    private ObservableSet<Expense> expenses = FXCollections.observableSet();
 
-    private static final String expenseErrorMsg = "Please enter valid information";
-    private static final String expenseAddedMsg = "Successfully added usage";
+    private static final String EXPENSE_ERROR_MSG = "Please enter valid information";
+    private static final String EXPENSE_ADDED_MSG = "Successfully added usage";
+    private static final String EXPENSE_UPDATED_MSG = "Expense update successfully";
 
-    @Autowired
-    public ExpensiveController(ExpenseRepository expenseRepository) {
-        this.expenseRepository = expenseRepository;
-    }
-
-    public void addExpense(ActionEvent event) {
+    public void addOrUpdateExpense(ActionEvent event) {
         if (isValidExpense()) {
-            addExpense();
-            showAlert(Alert.AlertType.INFORMATION, expenseAddedMsg).ifPresent(type -> closeWindow());
+            if (getAddBtn().getText().equals(BudgetUtil.UPDATE_TEXT)) {
+                updateExpense();
+                showAlert(Alert.AlertType.INFORMATION, EXPENSE_UPDATED_MSG)
+                        .ifPresent(type -> closeWindow());
+            } else {
+                addExpense();
+                showAlert(Alert.AlertType.INFORMATION, EXPENSE_ADDED_MSG)
+                        .ifPresent(type -> closeWindow());
+            }
         } else {
-            showAlert(Alert.AlertType.ERROR, expenseErrorMsg);
+            showAlert(Alert.AlertType.ERROR, EXPENSE_ERROR_MSG);
         }
     }
 
-    public ObservableList<Expense> getExpenses() {
-        return expenses;
+    public Expense getExpense() {
+        return expense;
     }
 
+    public void setExpense(Expense expense) {
+        this.expense = expense;
+    }
+
+    public Button getAddBtn() {
+        return addBtn;
+    }
+
+    public ObservableSet<Expense> getExpenses() {
+        return expenses;
+    }
 
     public void cancelExpense(ActionEvent event) {
         closeWindow();
@@ -79,8 +92,17 @@ public class ExpensiveController {
                 && null != dueDate;
     }
 
+    private void updateExpense() {
+        if (null != getExpense()) {
+            addOrUpdateExpense(getExpense());
+        }
+    }
+
     private void addExpense() {
-        Expense expense = new Expense();
+        addOrUpdateExpense(new Expense());
+    }
+
+    private void addOrUpdateExpense(Expense expense) {
         expense.setExpense(expenseTxt.getText());
         expense.setAmount(Double.valueOf(amountTxt.getText()));
         Date date = Date.from(dueDateDp.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());

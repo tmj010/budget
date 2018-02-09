@@ -44,7 +44,7 @@ public class Expense {
         this.amount.setValue(amount);
     }
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "budget_id")
     public Budget getBudget() {
         return budget;
@@ -83,5 +83,15 @@ public class Expense {
 
     public DoubleProperty amountProperty() {
         return amount;
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
     }
 }
