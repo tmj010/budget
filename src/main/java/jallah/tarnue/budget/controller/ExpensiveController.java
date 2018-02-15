@@ -1,5 +1,6 @@
 package jallah.tarnue.budget.controller;
 
+import com.sun.corba.se.impl.naming.cosnaming.NamingUtils;
 import jallah.tarnue.budget.model.Expense;
 import jallah.tarnue.budget.util.BudgetUtil;
 import javafx.collections.FXCollections;
@@ -9,6 +10,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -88,7 +90,7 @@ public class ExpensiveController {
         String usageText = expenseTxt.getText();
         String amountTxt = this.amountTxt.getText();
         LocalDate dueDate = dueDateDp.getValue();
-        return !StringUtils.isEmpty(usageText) && !StringUtils.isEmpty(amountTxt)
+        return !StringUtils.isEmpty(usageText) && NumberUtils.isNumber(amountTxt)
                 && null != dueDate;
     }
 

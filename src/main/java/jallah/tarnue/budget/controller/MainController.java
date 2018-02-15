@@ -48,9 +48,9 @@ public class MainController {
     @FXML
     private TableColumn<Expense, Boolean> completedCol;
     @FXML
-    private TextField totalUsageTxt;
+    private Label totalExpensesLbl;
     @FXML
-    private TextField amountLeftTxt;
+    private Label amountLeftLbl;
     @FXML
     private TextField spendMoneyTxt;
     @FXML
@@ -74,6 +74,16 @@ public class MainController {
     public MainController(ExpensiveController expensiveController, SpringFXMLLoader fxmlLoader) {
         this.expensiveController = expensiveController;
         this.fxmlLoader = fxmlLoader;
+    }
+
+    public void addExpense(ActionEvent event) throws IOException {
+        Parent expenseNode = fxmlLoader.load(EXPENSE_FXML);
+        Stage expenseStage = new Stage(StageStyle.DECORATED);
+        expenseStage.initModality(Modality.WINDOW_MODAL);
+        expenseStage.initOwner(root.getScene().getWindow());
+        expenseStage.setScene(new Scene(expenseNode));
+        expenseStage.setTitle(EXPENSE_TITLE);
+        expenseStage.show();
     }
 
     @FXML
@@ -111,9 +121,21 @@ public class MainController {
         completedCol.setCellFactory(CheckBoxTableCell.forTableColumn(completedCol));
         expensiveController.getExpenses().addListener((SetChangeListener<Expense>) change -> {
             if (change.wasAdded()) {
-                expenseTable.getItems().add(change.getElementAdded());
+                Expense expenseAdded = change.getElementAdded();
+                expenseTable.getItems().add(expenseAdded);
+                Double amount = expenseAdded.getAmount();
+                Double initialVal = Double.valueOf(totalExpensesLbl.getText());
+                totalExpensesLbl.setText((initialVal + amount) + "");
             } else if (change.wasRemoved()) {
-                expenseTable.getItems().remove(change.getElementRemoved());
+                Expense expenseRemoved = change.getElementRemoved();
+                expenseTable.getItems().remove(expenseRemoved);
+                Double amount = expenseRemoved.getAmount();
+                Double initialVal = Double.valueOf(totalExpensesLbl.getText());
+                totalExpensesLbl.setText((initialVal - amount) + "");
+                String currentAmount = totalExpensesLbl.getText();
+                if (!currentAmount.isEmpty() && currentAmount.equals("0.0")) {
+                    totalExpensesLbl.setText("0.00");
+                }
             }
         });
 
@@ -150,13 +172,7 @@ public class MainController {
         });
     }
 
-    public void addExpense(ActionEvent event) throws IOException {
-        Parent expenseNode = fxmlLoader.load(EXPENSE_FXML);
-        Stage expenseStage = new Stage(StageStyle.DECORATED);
-        expenseStage.initModality(Modality.WINDOW_MODAL);
-        expenseStage.initOwner(root.getScene().getWindow());
-        expenseStage.setScene(new Scene(expenseNode));
-        expenseStage.setTitle(EXPENSE_TITLE);
-        expenseStage.show();
+    private void labelDisplay() {
+
     }
 }
