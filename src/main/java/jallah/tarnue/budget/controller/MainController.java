@@ -4,6 +4,9 @@ import jallah.tarnue.budget.SpringFXMLLoader;
 import jallah.tarnue.budget.model.Expense;
 import jallah.tarnue.budget.util.BudgetUtil;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -62,6 +65,10 @@ public class MainController {
     @FXML
     private Button cancelBtn;
 
+    private DoubleProperty totalExpensesProperty;
+    private DoubleProperty amountLeftOverProperty;
+    private DoubleProperty payAmountProperty;
+
     private SpringFXMLLoader fxmlLoader;
     private ExpensiveController expensiveController;
 
@@ -70,10 +77,17 @@ public class MainController {
     private static final String EXPENSE_FXML = "/fxml/expense.fxml";
     private static final String EXPENSE_TITLE = "Expense";
 
+    private enum Operator {
+        PLUS, MINUS
+    }
+
     @Autowired
     public MainController(ExpensiveController expensiveController, SpringFXMLLoader fxmlLoader) {
         this.expensiveController = expensiveController;
         this.fxmlLoader = fxmlLoader;
+        this.totalExpensesProperty = new SimpleDoubleProperty();
+        this.amountLeftOverProperty = new SimpleDoubleProperty();
+        this.payAmountProperty = new SimpleDoubleProperty();
     }
 
     public void addExpense(ActionEvent event) throws IOException {
@@ -89,12 +103,47 @@ public class MainController {
     @FXML
     private void initialize() {
         tableInitialization();
+        payAmountTxt.textProperty().addListener((o, oldVal, newVal) -> {
+            try {
+                Double value = Double.valueOf(newVal.trim());
+                payAmountProperty.setValue(value);
+                ObservableSet<Expense> expenses = expensiveController.getExpenses();
+                if (null != expenses && !expenses.isEmpty()) {
+                    double totalExpense = expenses.stream().mapToDouble(Expense::getAmount).sum();
+                    amountLeftOverProperty.setValue(value - totalExpense);
+                } else {
+                    amountLeftOverProperty.setValue(value);
+                }
+            } catch (NumberFormatException e) {
+                LOGGER.severe("Error while casting to double");
+            }
+        });
+
+        amountLeftOverProperty.addListener((o, oldVal, newVal) -> {
+            if (null != newVal) {
+                String amount = BudgetUtil.formatToUSCurrency(newVal.doubleValue());
+                amountLeftLbl.setText(amount);
+            }
+        });
+
+        totalExpensesProperty.addListener((o, oldVal, newVal) -> {
+            if (null != newVal) {
+                double totalExpensesValue = newVal.doubleValue();
+                String amount = BudgetUtil.formatToUSCurrency(totalExpensesValue);
+                totalExpensesLbl.setText(amount);
+
+                // Calculate amount left over
+                double updateAmtLeftOverValue = payAmountProperty.doubleValue() - totalExpensesValue;
+                amountLeftOverProperty.setValue(updateAmtLeftOverValue);
+            }
+        });
     }
 
     private void tableInitialization() {
         expenseCol.setCellValueFactory(new PropertyValueFactory<>("expense"));
         amountCol.setCellValueFactory(new PropertyValueFactory<>("amount"));
         dateCol.setCellValueFactory(new PropertyValueFactory<>("date"));
+
         dateCol.setCellFactory(TextFieldTableCell.forTableColumn(new StringConverter<Date>() {
             @Override
             public String toString(Date date) {
@@ -119,23 +168,26 @@ public class MainController {
 
         completedCol.setCellValueFactory(new PropertyValueFactory<>("completed"));
         completedCol.setCellFactory(CheckBoxTableCell.forTableColumn(completedCol));
+
         expensiveController.getExpenses().addListener((SetChangeListener<Expense>) change -> {
             if (change.wasAdded()) {
                 Expense expenseAdded = change.getElementAdded();
+
+                // Added a listener to update the total expenses label when this expense gets updated
+                expenseAdded.amountProperty().addListener((o, oldVal, newVal) -> {
+                    Double initialVal = totalExpensesProperty.doubleValue();
+                    Double oldDoubleVal = (Double) oldVal;
+                    Double newDoubleVal = (Double) newVal;
+                    totalExpensesProperty.setValue(((initialVal - oldDoubleVal) + newDoubleVal));
+                });
+
                 expenseTable.getItems().add(expenseAdded);
-                Double amount = expenseAdded.getAmount();
-                Double initialVal = Double.valueOf(totalExpensesLbl.getText());
-                totalExpensesLbl.setText((initialVal + amount) + "");
+                calculateExpenses(expenseAdded, Operator.PLUS);
+
             } else if (change.wasRemoved()) {
                 Expense expenseRemoved = change.getElementRemoved();
                 expenseTable.getItems().remove(expenseRemoved);
-                Double amount = expenseRemoved.getAmount();
-                Double initialVal = Double.valueOf(totalExpensesLbl.getText());
-                totalExpensesLbl.setText((initialVal - amount) + "");
-                String currentAmount = totalExpensesLbl.getText();
-                if (!currentAmount.isEmpty() && currentAmount.equals("0.0")) {
-                    totalExpensesLbl.setText("0.00");
-                }
+                calculateExpenses(expenseRemoved, Operator.MINUS);
             }
         });
 
@@ -172,7 +224,20 @@ public class MainController {
         });
     }
 
-    private void labelDisplay() {
-
+    private Double calculateExpenses(Expense expense, Operator operator) {
+        Double amount = expense.getAmount();
+        double initialVal = totalExpensesProperty.doubleValue();
+        switch (operator) {
+            case PLUS:
+                Double addedValue = initialVal + amount;
+                totalExpensesProperty.setValue(addedValue);
+                return addedValue;
+            case MINUS:
+                Double minusValue = initialVal - amount;
+                totalExpensesProperty.setValue(minusValue);
+                return minusValue;
+            default:
+                return null;
+        }
     }
 }

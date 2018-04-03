@@ -63,21 +63,21 @@
                                                 <Font name="System Bold" size="14.0" />
                                             </font>
                                         </Label>
-                                        <Label fx:id="totalExpensesLbl" prefHeight="20.0" prefWidth="38.0" text="0.00">
+                                        <Label fx:id="totalExpensesLbl" prefHeight="20.0" prefWidth="81.0">
                                             <font>
                                                 <Font name="System Bold" size="14.0" />
                                             </font>
                                         </Label>
                                     </children>
                                 </HBox>
-                                <HBox alignment="CENTER" layoutX="10.0" layoutY="292.0" prefHeight="45.0" prefWidth="348.0" spacing="5.0">
+                                <HBox alignment="CENTER" layoutX="10.0" layoutY="292.0" prefHeight="45.0" prefWidth="348.0">
                                     <children>
                                         <Label prefHeight="27.0" prefWidth="103.0" text="Amount left:">
                                             <font>
                                                 <Font name="System Bold" size="14.0" />
                                             </font>
                                         </Label>
-                                        <Label fx:id="amountLeftLbl" prefHeight="20.0" prefWidth="38.0">
+                                        <Label fx:id="amountLeftLbl" prefHeight="20.0" prefWidth="70.0">
                                             <font>
                                                 <Font name="System Bold" size="14.0" />
                                             </font>

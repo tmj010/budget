@@ -1,6 +1,5 @@
 package jallah.tarnue.budget.controller;
 
-import com.sun.corba.se.impl.naming.cosnaming.NamingUtils;
 import jallah.tarnue.budget.model.Expense;
 import jallah.tarnue.budget.util.BudgetUtil;
 import javafx.collections.FXCollections;
@@ -40,20 +39,15 @@ public class ExpensiveController {
     private ObservableSet<Expense> expenses = FXCollections.observableSet();
 
     private static final String EXPENSE_ERROR_MSG = "Please enter valid information";
-    private static final String EXPENSE_ADDED_MSG = "Successfully added usage";
-    private static final String EXPENSE_UPDATED_MSG = "Expense update successfully";
 
     public void addOrUpdateExpense(ActionEvent event) {
         if (isValidExpense()) {
             if (getAddBtn().getText().equals(BudgetUtil.UPDATE_TEXT)) {
                 updateExpense();
-                showAlert(Alert.AlertType.INFORMATION, EXPENSE_UPDATED_MSG)
-                        .ifPresent(type -> closeWindow());
             } else {
                 addExpense();
-                showAlert(Alert.AlertType.INFORMATION, EXPENSE_ADDED_MSG)
-                        .ifPresent(type -> closeWindow());
             }
+            closeWindow();
         } else {
             showAlert(Alert.AlertType.ERROR, EXPENSE_ERROR_MSG);
         }
