@@ -1,11 +1,16 @@
 package jallah.tarnue.budget.controller;
 
 import jallah.tarnue.budget.SpringFXMLLoader;
+import jallah.tarnue.budget.model.Budget;
 import jallah.tarnue.budget.model.Expense;
+import jallah.tarnue.budget.repository.BudgetRepository;
+import jallah.tarnue.budget.repository.ExpenseRepository;
 import jallah.tarnue.budget.util.BudgetUtil;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
@@ -21,6 +26,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.StringConverter;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -71,6 +77,8 @@ public class MainController {
 
     private SpringFXMLLoader fxmlLoader;
     private ExpensiveController expensiveController;
+    private BudgetRepository budgetRepository;
+    private ExpenseRepository expenseRepository;
 
     private static final Logger LOGGER = Logger.getGlobal();
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
@@ -82,8 +90,11 @@ public class MainController {
     }
 
     @Autowired
-    public MainController(ExpensiveController expensiveController, SpringFXMLLoader fxmlLoader) {
+    public MainController(ExpensiveController expensiveController, BudgetRepository budgetRepository,
+                          ExpenseRepository expenseRepository, SpringFXMLLoader fxmlLoader) {
         this.expensiveController = expensiveController;
+        this.budgetRepository = budgetRepository;
+        this.expenseRepository = expenseRepository;
         this.fxmlLoader = fxmlLoader;
         this.totalExpensesProperty = new SimpleDoubleProperty();
         this.amountLeftOverProperty = new SimpleDoubleProperty();
@@ -100,19 +111,40 @@ public class MainController {
         expenseStage.show();
     }
 
+    public void saveExpensive(ActionEvent event) {
+        Budget budget = new Budget();
+        budget.setAmountLeft(amountLeftOverProperty.doubleValue());
+        budget.setPayAmount(payAmountProperty.doubleValue());
+        budget.setPayPeriod(BudgetUtil.localDateToDate(payPeriod.getValue()));
+        budget.setSpendingMoney(BudgetUtil.getDoubleValue(spendMoneyTxt.getText()));
+        budget.setPrimarySaving(BudgetUtil.getDoubleValue(primarySavingTxt.getText()));
+        budget.setSecondarySaving(BudgetUtil.getDoubleValue(secondarySavingTxt.getText()));
+        Budget savedBudget = budgetRepository.save(budget);
+        expensiveController.getExpenses().stream().forEach(expense -> {
+            expense.setBudget(savedBudget);
+            expenseRepository.save(expense);
+        });
+    }
+
     @FXML
     private void initialize() {
         tableInitialization();
         payAmountTxt.textProperty().addListener((o, oldVal, newVal) -> {
             try {
-                Double value = Double.valueOf(newVal.trim());
-                payAmountProperty.setValue(value);
-                ObservableSet<Expense> expenses = expensiveController.getExpenses();
-                if (null != expenses && !expenses.isEmpty()) {
-                    double totalExpense = expenses.stream().mapToDouble(Expense::getAmount).sum();
-                    amountLeftOverProperty.setValue(value - totalExpense);
-                } else {
-                    amountLeftOverProperty.setValue(value);
+                String strAmtVal = newVal.trim();
+                if (NumberUtils.isDigits(strAmtVal)) {
+                    Double amtValue = Double.valueOf(strAmtVal);
+                    payAmountProperty.setValue(amtValue);
+                    if (amtValue > 0) {
+                        double textFieldValue = calculateTextField();
+                        ObservableSet<Expense> expenses = expensiveController.getExpenses();
+                        if (null != expenses && !expenses.isEmpty()) {
+                            double totalExpense = expenses.stream().mapToDouble(Expense::getAmount).sum();
+                            amountLeftOverProperty.setValue((amtValue - totalExpense) - textFieldValue);
+                        } else {
+                            amountLeftOverProperty.setValue(amtValue - textFieldValue);
+                        }
+                    }
                 }
             } catch (NumberFormatException e) {
                 LOGGER.severe("Error while casting to double");
@@ -133,10 +165,18 @@ public class MainController {
                 totalExpensesLbl.setText(amount);
 
                 // Calculate amount left over
-                double updateAmtLeftOverValue = payAmountProperty.doubleValue() - totalExpensesValue;
-                amountLeftOverProperty.setValue(updateAmtLeftOverValue);
+                double payAmount = payAmountProperty.doubleValue();
+                if (payAmount > 0) {
+                    double textFieldsValue = calculateTextField();
+                    double updateAmtLeftOverValue = (payAmount - totalExpensesValue) - textFieldsValue;
+                    amountLeftOverProperty.setValue(updateAmtLeftOverValue);
+                }
             }
         });
+
+        spendMoneyTxt.focusedProperty().addListener(new TextFieldFocusListener(spendMoneyTxt));
+        primarySavingTxt.focusedProperty().addListener(new TextFieldFocusListener(primarySavingTxt));
+        secondarySavingTxt.focusedProperty().addListener(new TextFieldFocusListener(secondarySavingTxt));
     }
 
     private void tableInitialization() {
@@ -182,12 +222,12 @@ public class MainController {
                 });
 
                 expenseTable.getItems().add(expenseAdded);
-                calculateExpenses(expenseAdded, Operator.PLUS);
+                calculateExpenses(expenseAdded, totalExpensesProperty, Operator.PLUS);
 
             } else if (change.wasRemoved()) {
                 Expense expenseRemoved = change.getElementRemoved();
                 expenseTable.getItems().remove(expenseRemoved);
-                calculateExpenses(expenseRemoved, Operator.MINUS);
+                calculateExpenses(expenseRemoved, totalExpensesProperty, Operator.MINUS);
             }
         });
 
@@ -224,20 +264,65 @@ public class MainController {
         });
     }
 
-    private Double calculateExpenses(Expense expense, Operator operator) {
+    private Double calculateExpenses(Expense expense, DoubleProperty doubleProperty, Operator operator) {
         Double amount = expense.getAmount();
-        double initialVal = totalExpensesProperty.doubleValue();
+        double initialVal = doubleProperty.doubleValue();
         switch (operator) {
             case PLUS:
-                Double addedValue = initialVal + amount;
-                totalExpensesProperty.setValue(addedValue);
+                Double addedValue = (initialVal + amount);
+                doubleProperty.setValue(addedValue);
                 return addedValue;
             case MINUS:
-                Double minusValue = initialVal - amount;
-                totalExpensesProperty.setValue(minusValue);
+                Double minusValue = (initialVal - amount);
+                doubleProperty.setValue(minusValue);
                 return minusValue;
             default:
                 return null;
+        }
+    }
+
+    private double calculateTextField() {
+        double totalValue = 0;
+        totalValue += BudgetUtil.getDoubleValue(spendMoneyTxt.getText());
+        totalValue += BudgetUtil.getDoubleValue(primarySavingTxt.getText());
+        totalValue += BudgetUtil.getDoubleValue(secondarySavingTxt.getText());
+        return totalValue;
+    }
+
+    private class TextFieldFocusListener implements ChangeListener<Boolean> {
+        private TextField textField;
+
+        TextFieldFocusListener(TextField textField) {
+            this.textField = textField;
+        }
+
+        @Override
+        public void changed(ObservableValue<? extends Boolean> observable, Boolean outOfFocus, Boolean inFocus) {
+            if (outOfFocus) {
+                double calculatedTextField = 0;
+                if (textField == spendMoneyTxt) {
+                    calculatedTextField += BudgetUtil.getDoubleValue(primarySavingTxt.getText());
+                    calculatedTextField += BudgetUtil.getDoubleValue(secondarySavingTxt.getText());
+                } else if (textField == primarySavingTxt) {
+                    calculatedTextField += BudgetUtil.getDoubleValue(spendMoneyTxt.getText());
+                    calculatedTextField += BudgetUtil.getDoubleValue(secondarySavingTxt.getText());
+                } else if (textField == secondarySavingTxt) {
+                    calculatedTextField += BudgetUtil.getDoubleValue(primarySavingTxt.getText());
+                    calculatedTextField += BudgetUtil.getDoubleValue(spendMoneyTxt.getText());
+                }
+                double amountLeftOver = (payAmountProperty.doubleValue() - totalExpensesProperty.doubleValue()) - calculatedTextField;
+                String strAmt = textField.getText();
+                if (NumberUtils.isDigits(strAmt)) {
+                    double amount = Double.parseDouble(strAmt);
+                    if (amount <= amountLeftOver) {
+                        amountLeftOverProperty.setValue(amountLeftOver - amount);
+                    } else {
+                        // TODO add an alert to let the user know that they can't have more then the amount left over
+                    }
+                } else {
+                    amountLeftOverProperty.setValue(amountLeftOver);
+                }
+            }
         }
     }
 }

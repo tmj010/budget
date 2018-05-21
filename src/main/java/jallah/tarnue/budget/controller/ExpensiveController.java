@@ -89,8 +89,9 @@ public class ExpensiveController {
     }
 
     private void updateExpense() {
-        if (null != getExpense()) {
-            addOrUpdateExpense(getExpense());
+        Expense expense = getExpense();
+        if (null != expense) {
+            addOrUpdateExpense(expense);
         }
     }
 

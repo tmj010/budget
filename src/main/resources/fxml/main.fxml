@@ -101,7 +101,7 @@
                                 </TextField>
                                 <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="15.0">
                                     <children>
-                                        <Button fx:id="saveBtn" mnemonicParsing="false" prefHeight="48.0" prefWidth="121.0" text="Save">
+                                        <Button fx:id="saveBtn" mnemonicParsing="false" onAction="#saveExpensive" prefHeight="48.0" prefWidth="121.0" text="Save">
                                             <font>
                                                 <Font size="22.0" />
                                             </font>
